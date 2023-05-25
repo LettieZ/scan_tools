@@ -158,11 +158,11 @@ class LaserScanMatcher
 
     // **** methods
 
-    void initParams();
+    void initParams(); //初始化参数，然后设定ros的发布节点和接受节点
     void processScan(LDP& curr_ldp_scan, const ros::Time& time);
 
     void laserScanToLDP(const sensor_msgs::LaserScan::ConstPtr& scan_msg,
-                              LDP& ldp);
+                              LDP& ldp); //把ros的laser_data转换成本程序定义的雷达格式laser_data* LDP，LDP 中包含了odometry信息和真实位姿true_pose estimate
     void PointCloudToLDP(const PointCloudT::ConstPtr& cloud,
                                LDP& ldp);
 
@@ -175,7 +175,7 @@ class LaserScanMatcher
     void velStmpCallback(const geometry_msgs::TwistStamped::ConstPtr& twist_msg);
 
     void createCache (const sensor_msgs::LaserScan::ConstPtr& scan_msg);
-    bool getBaseToLaserTf (const std::string& frame_id);
+    bool getBaseToLaserTf (const std::string& frame_id); //机器人和雷达的变换
 
     bool newKeyframeNeeded(const tf::Transform& d);
 

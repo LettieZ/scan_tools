@@ -453,7 +453,7 @@ void LaserScanMatcher::processScan(LDP& curr_ldp_scan, const ros::Time& time)
 
   double dt = (time - last_icp_time_).toSec();
   double pr_ch_x, pr_ch_y, pr_ch_a;
-  getPrediction(pr_ch_x, pr_ch_y, pr_ch_a, dt);
+  getPrediction(pr_ch_x, pr_ch_y, pr_ch_a, dt); //根据前后两帧的变化时间预测位姿变化
 
   // the predicted change of the laser's position, in the fixed frame
 
@@ -467,7 +467,7 @@ void LaserScanMatcher::processScan(LDP& curr_ldp_scan, const ros::Time& time)
   // the predicted change of the laser's position, in the laser frame
 
   tf::Transform pr_ch_l;
-  pr_ch_l = laser_to_base_ * f2b_.inverse() * pr_ch * f2b_ * base_to_laser_ ;
+  pr_ch_l = laser_to_base_ * f2b_.inverse() * pr_ch * f2b_ * base_to_laser_ ; //计算当前预测位姿在全局坐标系下的坐标
 
   input_.first_guess[0] = pr_ch_l.getOrigin().getX();
   input_.first_guess[1] = pr_ch_l.getOrigin().getY();
@@ -492,7 +492,8 @@ void LaserScanMatcher::processScan(LDP& curr_ldp_scan, const ros::Time& time)
 
   // *** scan match - using point to line icp from CSM
 
-  sm_icp(&input_, &output_);
+  sm_icp(&input_, &output_); //调用CSM(http://wiki.ros.org/canonical_scan_matcher)的PI_ICP算法,得到优化后的预测位资
+                             //CSM库是纯C实现的,代码地址: https://github.com/aneyes/csm
   tf::Transform corr_ch;
 
   if (output_.valid)
@@ -503,6 +504,7 @@ void LaserScanMatcher::processScan(LDP& curr_ldp_scan, const ros::Time& time)
     createTfFromXYTheta(output_.x[0], output_.x[1], output_.x[2], corr_ch_l);
 
     // the correction of the base's position, in the base frame
+    // 将雷达坐标系下的坐标变换 转换成 base_link坐标系下的坐标变换
     corr_ch = base_to_laser_ * corr_ch_l * laser_to_base_;
 
     // update the pose in the world frame
